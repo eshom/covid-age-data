@@ -6,7 +6,7 @@ Authors@R:
            family = "Shomron",
            role = c("aut", "cre"),
            email = "erezshomron@mykolab.com")
-Description: This package has helper function for downloading
+Description: This is a small helper package for downloading
     and subsetting covid-19 from the COVerAGE-DB Project.
 License: LGPL (>= 2.1)
 Encoding: UTF-8
