@@ -1,0 +1,17 @@
+Package: covidAgeData
+Title: Get Data from COVerAGE-DB
+Version: 0.0.1
+Authors@R:
+    person(given = "Erez",
+           family = "Shomron",
+           role = c("aut", "cre"),
+           email = "erezshomron@mykolab.com")
+Description: This package has helper function for downloading
+    and subsetting covid-19 from the COVerAGE-DB Project.
+License: LGPL (>= 2.1)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports: osfr, readr
+Suggests: tibble
