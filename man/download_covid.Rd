@@ -5,9 +5,9 @@
 \title{Download COVerAGE-DB data}
 \usage{
 download_covid(
-  data = c("inputDB", "output_5", "output_10", "qualityMetrics"),
+  data = c("inputDB", "Output_5", "Output_10", "qualityMetrics"),
   temp = TRUE,
-  tibble = FALSE,
+  return = c("data.frame", "data.table", "tibble"),
   progress = TRUE,
   conflicts = "overwrite",
   recurse = FALSE,
@@ -17,11 +17,12 @@ download_covid(
 }
 \arguments{
 \item{data}{The name of the dataset to download. Can be one of the
-the following: "inputDB", "output_5", "output_10", "qualityMetrics".}
+the following: "inputDB", "Output_5", "Output_10", "qualityMetrics".}
 
 \item{temp}{Logical. Should the dataset be downloaded to a temporary directory?}
 
-\item{tibble}{Logical. should the function return a tibble?}
+\item{return}{What should be the return type? Can be on of the following:
+"data.frame", "data.table", "tibble".}
 
 \item{progress}{Passed to \code{\link[osfr:osf_download]{osfr::osf_download()}}. Logical, if TRUE
 progress bars are displayed for each file transfer. Mainly useful for
@@ -49,11 +50,12 @@ will determine the number of levels to recurse.}
 \item{verbose}{Passed to \code{\link[osfr:osf_download]{osfr::osf_download()}} Logical, indicating whether
 to print informative messages about interactions with the OSF API (default FALSE).}
 
-\item{...}{Additional named arguments passed to \code{\link[readr:read_delim]{readr::read_csv()}}}
+\item{...}{Additional named arguments passed to \code{\link[data.table:fread]{data.table::fread()}}}
 }
 \value{
-By default a data frame or a tibble. The return value is controlled
-by the "tibble" parameter.
+By default a data frame with the uncompressed dataset.
+Can be set to return either a data table or
+a tibble. The return type is controlled by the "return" parameter.
 }
 \description{
 Downloads one of the COVerAGE-DB datasets hosted on \href{https://osf.io/mpwjq/}{OSF}.
@@ -61,27 +63,26 @@ It reads the downloaded data and converts it into a data frame.
 }
 \details{
 This function uses the OSF API to download the publicly available COVerAGE-DB
-datasets. It then returns the downloaded dataset as a data frame or tibble.
-There are 4 possible datasets available for download: "inputDB", "output_5",
-"output_10", "qualityMetrics".
+datasets. It then returns the downloaded dataset as a data frame, data table, or tibble.
+There are 4 possible datasets available for download: "inputDB", "Output_5",
+"Output_10", "qualityMetrics".
 See \url{https://timriffe.github.io/covid_age/GettingStarted.html} for more
-information about these datasets and the reading routine
-used in this function.
+information about these datasets.
 }
 \examples{
 \dontrun{
 # Basic usage
 df <- download_covid("inputDB")
 # Download data to the working directory.
-df <- download_covid("output_5", temp = FALSE)
+df <- download_covid("Output_5", temp = FALSE)
 # If you want a tibble instead of a data frame:
-df <- download_covid("output_10", tibble = TRUE)
+df <- download_covid("Output_10", return = "tibble")
 }
 
 }
 \seealso{
 \code{\link[osfr:osf_retrieve]{osfr::osf_retrieve()}} for the OSF entity retrieval function;
-\code{\link[osfr:osf_download]{osfr::osf_download()}} for the downloading function; \code{\link[readr:read_delim]{readr::read_csv()}} for
+\code{\link[osfr:osf_download]{osfr::osf_download()}} for the downloading function; \code{\link[data.table:fread]{data.table::fread()}} for
 the reading function.
 }
 \author{
