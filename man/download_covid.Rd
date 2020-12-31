@@ -2,6 +2,7 @@
 % Please edit documentation in R/download_covid.R
 \name{download_covid}
 \alias{download_covid}
+\alias{download_covid_version}
 \title{Download COVerAGE-DB data}
 \usage{
 download_covid(
@@ -12,6 +13,16 @@ download_covid(
   conflicts = "overwrite",
   recurse = FALSE,
   verbose = FALSE,
+  ...
+)
+
+download_covid_version(
+  data = c("inputDB", "Output_5", "Output_10", "qualityMetrics"),
+  version,
+  temp = TRUE,
+  download_method = "auto",
+  return = c("data.frame", "data.table", "tibble"),
+  progress = TRUE,
   ...
 )
 }
@@ -27,7 +38,8 @@ the following: "inputDB", "Output_5", "Output_10", "qualityMetrics".}
 \item{progress}{Passed to \code{\link[osfr:osf_download]{osfr::osf_download()}}. Logical, if TRUE
 progress bars are displayed for each file transfer. Mainly useful for
 transferring large files. For tracking lots of small files, setting
-‘verbose = TRUE’ is more informative.}
+‘verbose = TRUE’ is more informative. For \code{\link[=download_covid_version]{download_covid_version()}} this is
+passed instead to \code{\link[utils:download.file]{utils::download.file()}}}
 
 \item{conflicts}{Passed to \code{\link[osfr:osf_download]{osfr::osf_download()}}. This determines what
 happens when a file with the same name
@@ -51,23 +63,36 @@ will determine the number of levels to recurse.}
 to print informative messages about interactions with the OSF API (default FALSE).}
 
 \item{...}{Additional named arguments passed to \code{\link[data.table:fread]{data.table::fread()}}}
+
+\item{version}{Integer. Which file version to download?}
+
+\item{download_method}{Passed to \code{\link[utils:download.file]{utils::download.file()}}. Method to be
+used for downloading files.  Current download methods are
+‘"internal"’, ‘"wininet"’ (Windows only) ‘"libcurl"’, ‘"wget"’ and ‘"curl"’,
+and there is a value ‘"auto"’: see ‘Details’ and ‘Note’.}
 }
 \value{
 By default a data frame with the uncompressed dataset.
 Can be set to return either a data table or
-a tibble. The return type is controlled by the "return" parameter.
+a tibble. The return type is controlled by the 'return' parameter.
 }
 \description{
 Downloads one of the COVerAGE-DB datasets hosted on \href{https://osf.io/mpwjq/}{OSF}.
 It reads the downloaded data and converts it into a data frame.
 }
 \details{
-This function uses the OSF API to download the publicly available COVerAGE-DB
-datasets. It then returns the downloaded dataset as a data frame, data table, or tibble.
+These functions use the OSF API to download the publicly available COVerAGE-DB
+datasets. It then returns the downloaded dataset as a data frame, data table,
+or tibble. \code{\link[=download_covid]{download_covid()}} Uses the \pkg{{osfr}} package as a backend.
+\code{\link[=download_covid_version]{download_covid_version()}} uses \code{\link[utils:download.file]{utils::download.file()}} to download the
+specific requested file version.
 There are 4 possible datasets available for download: "inputDB", "Output_5",
 "Output_10", "qualityMetrics".
 See \url{https://timriffe.github.io/covid_age/GettingStarted.html} for more
 information about these datasets.
+
+If the download times out, consider increasing the 'timeout' option in
+\code{\link[=options]{options()}}
 }
 \examples{
 \dontrun{
@@ -77,6 +102,8 @@ df <- download_covid("inputDB")
 df <- download_covid("Output_5", temp = FALSE)
 # If you want a tibble instead of a data frame:
 df <- download_covid("Output_10", return = "tibble")
+# Get the first 'inputDB' version
+df <- download_covid_version("InputDB", version = 1)
 }
 
 }
