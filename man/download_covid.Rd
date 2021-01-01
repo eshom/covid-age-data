@@ -7,7 +7,9 @@
 \usage{
 download_covid(
   data = c("inputDB", "Output_5", "Output_10", "qualityMetrics"),
-  temp = TRUE,
+  dest = getwd(),
+  temp = FALSE,
+  download_only = FALSE,
   return = c("data.frame", "data.table", "tibble"),
   progress = TRUE,
   conflicts = "overwrite",
@@ -19,8 +21,10 @@ download_covid(
 download_covid_version(
   data = c("inputDB", "Output_5", "Output_10", "qualityMetrics"),
   version,
-  temp = TRUE,
+  dest = getwd(),
+  temp = FALSE,
   download_method = "auto",
+  download_only = FALSE,
   return = c("data.frame", "data.table", "tibble"),
   progress = TRUE,
   ...
@@ -30,7 +34,13 @@ download_covid_version(
 \item{data}{The name of the dataset to download. Can be one of the
 the following: "inputDB", "Output_5", "Output_10", "qualityMetrics".}
 
+\item{dest}{Character. If 'temp' is set to FALSE, specifies the directory
+the dataset should be downloaded to. By default, the current working directory.}
+
 \item{temp}{Logical. Should the dataset be downloaded to a temporary directory?}
+
+\item{download_only}{Logical. Should the dataset be downloaded without
+reading it}
 
 \item{return}{What should be the return type? Can be on of the following:
 "data.frame", "data.table", "tibble".}
@@ -75,6 +85,8 @@ and there is a value ‘"auto"’: see ‘Details’ and ‘Note’.}
 By default a data frame with the uncompressed dataset.
 Can be set to return either a data table or
 a tibble. The return type is controlled by the 'return' parameter.
+If 'download_only' is set to TRUE, the function will
+invisibly return NULL after downloading the dataset.
 }
 \description{
 Downloads one of the COVerAGE-DB datasets hosted on \href{https://osf.io/mpwjq/}{OSF}.

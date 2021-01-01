@@ -19,7 +19,11 @@
 #' @title Download COVerAGE-DB data
 #' @param data The name of the dataset to download. Can be one of the
 #' the following: "inputDB", "Output_5", "Output_10", "qualityMetrics".
+#' @param dest Character. If 'temp' is set to FALSE, specifies the directory
+#' the dataset should be downloaded to. By default, the current working directory.
 #' @param temp Logical. Should the dataset be downloaded to a temporary directory?
+#' @param download_only Logical. Should the dataset be downloaded without
+#' reading it
 #' @param return What should be the return type? Can be on of the following:
 #' "data.frame", "data.table", "tibble".
 #' @param progress Passed to [osfr::osf_download()]. Logical, if TRUE
@@ -47,6 +51,8 @@
 #' @return By default a data frame with the uncompressed dataset.
 #' Can be set to return either a data table or
 #' a tibble. The return type is controlled by the 'return' parameter.
+#' If 'download_only' is set to TRUE, the function will
+#' invisibly return NULL after downloading the dataset.
 #' @author Erez Shomron
 #' @examples
 #' \dontrun{
@@ -62,32 +68,38 @@
 #'
 #' @export
 download_covid <- function(data = c("inputDB", "Output_5", "Output_10",
-                                    "qualityMetrics"), temp = TRUE,
-                            return = c("data.frame", "data.table", "tibble"),
-                            progress = TRUE, conflicts = "overwrite",
-                            recurse = FALSE, verbose = FALSE, ...) {
+                                    "qualityMetrics"), dest = getwd(),
+                           temp = FALSE, download_only = FALSE,
+                           return = c("data.frame", "data.table", "tibble"),
+                           progress = TRUE, conflicts = "overwrite",
+                           recurse = FALSE, verbose = FALSE, ...) {
         stopifnot(is.character(data))
 
         rinfo <- get_rinfo(data[1])
         stopifnot(!is.null(rinfo)) # means 'data' wasn't one of the listed datasets
 
-        stopifnot(is.logical(temp))
+        stopifnot(is.logical(temp), is.logical(download_only))
+        if (temp && download_only) warning("'temp' set to TRUE, ",
+                                           "ignoring 'download_only'")
         if (temp) {
                 path <- tempdir() # cleaned up after reading the dataset
         } else {
-                path <- getwd()
+                stopifnot(is.character(dest), length(dest) == 1)
+                path <- dest
         }
 
         osf <- osfr::osf_retrieve_file(rinfo[[1]])
         osfr::osf_download(osf, path, progress = progress,
                            conflicts = conflicts, recurse = recurse,
                            verbose = verbose)
+        if (!temp && download_only) return (invisible(NULL))
 
         filename    <- paste0(data[1], ".zip")
         zippath     <- file.path(path, filename)
 
         stopifnot(file.exists(zippath)) # The file was not downloaded or deleted
         if (temp) on.exit(unlink(zippath), add = TRUE) # Cleanup
+
 
         return (read_covid(zippath, data, return, ...))
 }
@@ -100,8 +112,10 @@ download_covid <- function(data = c("inputDB", "Output_5", "Output_10",
 #' and there is a value ‘"auto"’: see ‘Details’ and ‘Note’.
 #' @export
 download_covid_version <- function(data = c("inputDB", "Output_5", "Output_10",
-                                             "qualityMetrics"), version,
-                                    temp = TRUE, download_method = "auto",
+                                            "qualityMetrics"), version,
+                                   dest = getwd(), temp = FALSE,
+                                   download_method = "auto",
+                                   download_only = FALSE,
                                    return = c("data.frame", "data.table",
                                               "tibble"),
                                    progress = TRUE, ...) {
@@ -115,11 +129,14 @@ download_covid_version <- function(data = c("inputDB", "Output_5", "Output_10",
         stopifnot(is.numeric(version) || is.integer(version),
                   length(version) == 1)
 
-        stopifnot(is.logical(temp))
+        stopifnot(is.logical(temp), is.logical(download_only))
+        if (temp && download_only) warning("'temp' set to TRUE, ",
+                                           "ignoring 'download_only'")
         if (temp) {
                 path <- tempdir()
         } else {
-                path <- getwd()
+                stopifnot(is.character(dest), length(dest) == 1)
+                path <- dest
         }
 
         url <- paste0("https://osf.io/", rinfo[[1]], "/download?version=",
@@ -140,6 +157,7 @@ download_covid_version <- function(data = c("inputDB", "Output_5", "Output_10",
         if (return_code) {
                 stop("Download failed with return code ", return_code)
         }
+        if (!temp && download_only) return (invisible(NULL))
 
         return (read_covid(zippath, data, return, ...))
 }
