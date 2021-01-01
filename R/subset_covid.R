@@ -20,7 +20,7 @@
 #' @param Sex Character vector of sexes to select. Usually either 'b' for both.
 #' 'f' for females, and 'm' for males.
 #' @param Date Either a character or Date vector of dates to include. If a
-#' character vector, then the date must be in "%Y-%m-%d" format.
+#' character vector, then the date must be in "yyyy-mm-dd" format.
 #' @return The subsetted data frame like object.
 #' @author Erez Shomron
 #' @examples
@@ -66,8 +66,9 @@ subset_covid <- function(df, Country, Region, Sex, Date) {
                 df <- collapse::fsubset(df, Date >= d)
         }
 
-        # if df$Date wasn't a Date object, then convert back.
-        if (!date_is_date) {
+        # if df$Date wasn't a Date object, and it was transformed,
+        # then convert back.
+        if (!missing(Date) && !date_is_date) {
                 df <- collapse::ftransform(df, Date = format(Date, "%d.%m.%Y"))
         }
 

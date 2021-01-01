@@ -5,16 +5,16 @@
 \title{Read downloaded COVerAGE-DB datasets}
 \usage{
 read_covid(
-  filepath,
+  zippath,
   data = c("inputDB", "Output_5", "Output_10", "qualityMetrics"),
   return = c("data.frame", "data.table", "tibble"),
   ...
 )
 }
 \arguments{
-\item{filepath}{Character. The local file path of the downloaded dataset.}
+\item{zippath}{Character. The local zip archive of the downloaded dataset.}
 
-\item{data}{The name of the dataset to download. Can be one of the
+\item{data}{The name of the dataset that is to be read. Can be one of the
 the following: "inputDB", "Output_5", "Output_10", "qualityMetrics".}
 
 \item{return}{What should be the return type? Can be on of the following:

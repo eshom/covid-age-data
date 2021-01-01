@@ -3,4 +3,5 @@
 export(download_covid)
 export(download_covid_version)
 export(read_covid)
+export(read_subset_covid)
 export(subset_covid)

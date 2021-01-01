@@ -85,15 +85,11 @@ download_covid <- function(data = c("inputDB", "Output_5", "Output_10",
 
         filename    <- paste0(data[1], ".zip")
         zippath     <- file.path(path, filename)
-        archivefile <- file.path("Data", paste0(data[1], ".csv"))
 
         stopifnot(file.exists(zippath)) # The file was not downloaded or deleted
         if (temp) on.exit(unlink(zippath), add = TRUE) # Cleanup
 
-        filepath <- utils::unzip(zippath, archivefile, exdir = tempdir())
-        on.exit(unlink(filepath), add = TRUE) # Cleanup
-
-        return (read_covid(filepath, data, return, ...))
+        return (read_covid(zippath, data, return, ...))
 }
 
 #' @rdname download_covid
@@ -131,7 +127,6 @@ download_covid_version <- function(data = c("inputDB", "Output_5", "Output_10",
 
         filename    <- paste0(data[1], "_v", version, ".zip")
         zippath     <- file.path(path, filename)
-        archivefile <- file.path("Data", paste0(data[1], ".csv"))
 
         message("Downloading ", filename, " (timeout set to ",
                 getOption("timeout"), ")")
@@ -146,8 +141,5 @@ download_covid_version <- function(data = c("inputDB", "Output_5", "Output_10",
                 stop("Download failed with return code ", return_code)
         }
 
-        filepath <- utils::unzip(zippath, archivefile, exdir = tempdir())
-        on.exit(unlink(filepath), add = TRUE) # Cleanup
-
-        return (read_covid(filepath, data, return, ...))
+        return (read_covid(zippath, data, return, ...))
 }
