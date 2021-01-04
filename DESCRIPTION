@@ -25,5 +25,6 @@ Suggests: tibble (>= 3.0.4)
 License: LGPL (>= 2.1)
 Encoding: UTF-8
 LazyData: true
+Remotes: https://github.com/SebKrantz/collapse
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1

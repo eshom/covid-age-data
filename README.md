@@ -3,18 +3,8 @@
 ## Install
 To install `covidAgeData` run the following code in your favourite R console:
 ```r
-install.packages("devtools")
-devtools::install_github("https://github.com/eshom/covid-age-data")
-```
-
-**Note:** The package imports the
-[collapse](https://github.com/SebKrantz/collapse/) package,
-which is temporarily archived by CRAN. This should be resolved soon.
-However, for now run this code to install `covidAgeData`:
-```r
-install.packages("devtools")
-devtools::install_github("https://github.com/SebKrantz/collapse/")
-devtools::install_github("https://github.com/eshom/covid-age-data/")
+install.packages("remotes")
+remotes::install_github("https://github.com/eshom/covid-age-data")
 ```
 
 ## Citation
