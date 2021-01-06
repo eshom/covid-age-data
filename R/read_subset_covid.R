@@ -72,29 +72,31 @@ read_subset_covid <- function(zippath,
                 df <- ffbase::subset.ffdf(df, Country %in% c)
         }
         # No reason to continue if we have 0 rows
-        if(nrow(df) == 0) return (as.data.frame(df))
+        if (nrow(df) == 0) return(as.data.frame(df))
         if (!miss_args["Region"]) {
                 r  <- Region
                 df <- ffbase::subset.ffdf(df, Region %in% r)
         }
-        if(nrow(df) == 0) return (as.data.frame(df))
+        if (nrow(df) == 0) return(as.data.frame(df))
         if (!miss_args["Sex"]) {
                 s  <- Sex
                 df <- ffbase::subset.ffdf(df, Sex %in% s)
         }
-        if(nrow(df) == 0) return (as.data.frame(df))
+        if (nrow(df) == 0) return(as.data.frame(df))
         if (!miss_args["Date"]) {
                 if (!inherits(Date, "Date")) {
                         # default expected format: yyyy-mm-dd
                         Date <- as.Date(Date)
                 }
                 if (!date_is_date) {
-                        df <-ffbase::transform.ffdf(df, Date = as.Date(Date, "%d.%m.%Y"))
+                        df <- ffbase::transform.ffdf(
+                                              df,
+                                              Date = as.Date(Date, "%d.%m.%Y"))
                 }
                 d  <- min(Date)
                 df <- ffbase::subset.ffdf(df, Date >= d)
         }
-        if(nrow(df) == 0) return (as.data.frame(df))
+        if (nrow(df) == 0) return(as.data.frame(df))
 
         out <- as.data.frame(df)
 
@@ -104,14 +106,16 @@ read_subset_covid <- function(zippath,
         # if df$Date wasn't a Date object, and it was transformed,
         # then convert back.
         if (!miss_args["Date"] && !date_is_date) {
-                out <- collapse::ftransform(out, Date = format(Date, "%d.%m.%Y"))
+                out <- collapse::ftransform(
+                                         out,
+                                         Date = format(Date, "%d.%m.%Y"))
         }
 
         return <- return[1]
         switch(return,
-               data.frame = return (out),
-               data.table = return (collapse::qDT(out)),
-               tibble     = return (collapse::qTBL(out)))
+               data.frame = return(out),
+               data.table = return(collapse::qDT(out)),
+               tibble     = return(collapse::qTBL(out)))
 
         warning("Invalid return type specified, returning data.frame")
         return(out)

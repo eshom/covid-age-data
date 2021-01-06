@@ -1,7 +1,9 @@
-#' Downloads one of the COVerAGE-DB datasets hosted on [OSF](https://osf.io/mpwjq/).
+#' Downloads one of the COVerAGE-DB
+#' datasets hosted on [OSF](https://osf.io/mpwjq/).
 #' It reads the downloaded data and converts it into a data frame.
 #'
-#' These functions use the OSF API to download the publicly available COVerAGE-DB
+#' These functions use the OSF API to download the
+#' publicly available COVerAGE-DB
 #' datasets. It then returns the downloaded dataset as a data frame, data table,
 #' or tibble. [download_covid()] Uses the \pkg{{osfr}} package as a backend.
 #' [download_covid_version()] uses [utils::download.file()] to download the
@@ -14,14 +16,17 @@
 #' If the download times out, consider increasing the 'timeout' option in
 #' [options()]
 #' @seealso [osfr::osf_retrieve()] for the OSF entity retrieval function;
-#' [osfr::osf_download()] for the downloading function; [data.table::fread()] for
+#' [osfr::osf_download()] for the downloading function;
+#' [data.table::fread()] for
 #' the reading function.
 #' @title Download COVerAGE-DB data
 #' @param data The name of the dataset to download. Can be one of the
 #' the following: "inputDB", "Output_5", "Output_10", "qualityMetrics".
 #' @param dest Character. If 'temp' is set to FALSE, specifies the directory
-#' the dataset should be downloaded to. By default, the current working directory.
-#' @param temp Logical. Should the dataset be downloaded to a temporary directory?
+#' the dataset should be downloaded to. By default,
+#' the current working directory.
+#' @param temp Logical. Should the dataset be downloaded
+#' to a temporary directory?
 #' @param download_only Logical. Should the dataset be downloaded without
 #' reading it
 #' @param return What should be the return type? Can be on of the following:
@@ -46,7 +51,8 @@
 #' files and subdirectories are downloaded. Alternatively, a positive number
 #' will determine the number of levels to recurse.
 #' @param verbose Passed to [osfr::osf_download()] Logical, indicating whether
-#' to print informative messages about interactions with the OSF API (default FALSE).
+#' to print informative messages about interactions with the OSF API
+#' (default FALSE).
 #' @param ... Additional named arguments passed to [data.table::fread()]
 #' @return By default a data frame with the uncompressed dataset.
 #' Can be set to return either a data table or
@@ -76,7 +82,8 @@ download_covid <- function(data = c("inputDB", "Output_5", "Output_10",
         stopifnot(is.character(data))
 
         rinfo <- get_rinfo(data[1])
-        stopifnot(!is.null(rinfo)) # means 'data' wasn't one of the listed datasets
+        stopifnot(!is.null(rinfo)) # means 'data' wasn't one
+                                   # of the listed datasets
 
         stopifnot(is.logical(temp), is.logical(download_only))
         if (temp && download_only) warning("'temp' set to TRUE, ",
@@ -92,7 +99,7 @@ download_covid <- function(data = c("inputDB", "Output_5", "Output_10",
         osfr::osf_download(osf, path, progress = progress,
                            conflicts = conflicts, recurse = recurse,
                            verbose = verbose)
-        if (!temp && download_only) return (invisible(NULL))
+        if (!temp && download_only) return(invisible(NULL))
 
         filename    <- paste0(data[1], ".zip")
         zippath     <- file.path(path, filename)
@@ -101,7 +108,7 @@ download_covid <- function(data = c("inputDB", "Output_5", "Output_10",
         if (temp) on.exit(unlink(zippath), add = TRUE) # Cleanup
 
 
-        return (read_covid(zippath, data, return, ...))
+        return(read_covid(zippath, data, return, ...))
 }
 
 #' @rdname download_covid
@@ -157,7 +164,7 @@ download_covid_version <- function(data = c("inputDB", "Output_5", "Output_10",
         if (return_code) {
                 stop("Download failed with return code ", return_code)
         }
-        if (!temp && download_only) return (invisible(NULL))
+        if (!temp && download_only) return(invisible(NULL))
 
-        return (read_covid(zippath, data, return, ...))
+        return(read_covid(zippath, data, return, ...))
 }

@@ -32,15 +32,16 @@ read_covid <- function(zippath, data = c("inputDB", "Output_5", "Output_10",
         on.exit(unlink(filepath), add = TRUE) # Cleanup
 
         message("Reading ", filepath)
-        out <- data.table::fread(filepath, sep = ',',
-                                 colClasses = rinfo[[2]], skip = rinfo[[3]], ...)
+        out <- data.table::fread(filepath, sep = ",",
+                                 colClasses = rinfo[[2]],
+                                 skip = rinfo[[3]], ...)
 
         return <- return[1]
         switch(return,
-               data.frame = return (collapse::qDF(out)),
-               data.table = return (out),
-               tibble     = return (collapse::qTBL(out)))
+               data.frame = return(collapse::qDF(out)),
+               data.table = return(out),
+               tibble     = return(collapse::qTBL(out)))
 
         warning("Invalid return type specified, returning data.frame")
-        return (collapse::qDF(out))
+        return(collapse::qDF(out))
 }

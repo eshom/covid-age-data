@@ -60,7 +60,10 @@ subset_covid <- function(df, Country, Region, Sex, Date) {
         if (!missing(Date)) {
                 stopifnot(inherits(Date, "Date"))
                 if (!date_is_date) {
-                        df <- collapse::ftransform(df, Date = as.Date(Date, "%d.%m.%Y"))
+                        df <- collapse::ftransform(
+                                                df,
+                                                Date = as.Date(Date,
+                                                               "%d.%m.%Y"))
                 }
                 d  <- min(Date)
                 df <- collapse::fsubset(df, Date >= d)
@@ -72,5 +75,5 @@ subset_covid <- function(df, Country, Region, Sex, Date) {
                 df <- collapse::ftransform(df, Date = format(Date, "%d.%m.%Y"))
         }
 
-        return (df)
+        return(df)
 }
