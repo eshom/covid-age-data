@@ -9,6 +9,13 @@
 #' large datasets, or to generally conserve memory the *R* process uses.
 #' Specifically, this is useful for reading the 'inputDB' dataset,
 #' which currently holds millions of rows.
+#'
+#' [mem_read_subset_covid()] is useful for caching subsetted datasets,
+#' to save time executing repeated calls.
+#' Note: if the original dataset updates,
+#' you need to remember to clear the cache to get
+#' updated results. You can do that by using [memoise::forget()] or by
+#' deleting the cache directory.
 #' @title Read a subset of a COVerAGE-DB dataset
 #' @param zippath Character. The local zip archive of the downloaded dataset.
 #' @param data The name of the dataset that is to be read. Can be one of the
@@ -24,8 +31,11 @@
 #' @return By default a data frame with the subsetted dataset.
 #' Can be set to return either a data table or
 #' a tibble. The return type is controlled by the 'return' parameter.
+#'
+#' [mem_read_subset_covid()] returns a memoised copy of [read_subset_covid()]
 #' @author Erez Shomron
 #'
+#' @importFrom ff .rambytes vmode
 #' @export
 read_subset_covid <- function(zippath,
                               data = c("inputDB", "Output_5", "Output_10",
@@ -60,30 +70,21 @@ read_subset_covid <- function(zippath,
         df   <- ff::read.csv.ffdf(file = zcon, colClasses = rinfo[[2]],
                                   skip = rinfo[[3]])
 
-        # This object needs to be in the search path, otherwise
-        # 'ffbase::subset.ffdf()' may throw an error because it
-        # assumes ff is attached.
-        .rambytes <- ff::.rambytes
-
         date_is_date <- inherits(df$Date, "Date")
 
         if (!miss_args["Country"]) {
                 c  <- Country
                 df <- ffbase::subset.ffdf(df, Country %in% c)
         }
-        # No reason to continue if we have 0 rows
-        if (nrow(df) == 0) return(as.data.frame(df))
-        if (!miss_args["Region"]) {
+        if (!miss_args["Region"] && !nrow(df) == 0) {
                 r  <- Region
                 df <- ffbase::subset.ffdf(df, Region %in% r)
         }
-        if (nrow(df) == 0) return(as.data.frame(df))
-        if (!miss_args["Sex"]) {
+        if (!miss_args["Sex"] && !nrow(df) == 0) {
                 s  <- Sex
                 df <- ffbase::subset.ffdf(df, Sex %in% s)
         }
-        if (nrow(df) == 0) return(as.data.frame(df))
-        if (!miss_args["Date"]) {
+        if (!miss_args["Date"] && !nrow(df) == 0) {
                 if (!inherits(Date, "Date")) {
                         # default expected format: yyyy-mm-dd
                         Date <- as.Date(Date)
@@ -96,6 +97,7 @@ read_subset_covid <- function(zippath,
                 d  <- min(Date)
                 df <- ffbase::subset.ffdf(df, Date >= d)
         }
+        # No reason to continue if we have 0 rows
         if (nrow(df) == 0) return(as.data.frame(df))
 
         out <- as.data.frame(df)
@@ -119,4 +121,26 @@ read_subset_covid <- function(zippath,
 
         warning("Invalid return type specified, returning data.frame")
         return(out)
+}
+
+#' @rdname read_subset_covid
+#' @param cache_memory Should the subsets be cached in memory?
+#' @param cache_dir If 'cache_memory' is FALSE, then this is the path to cache
+#' subsets in.
+#' @seealso [memoise::memoise()] for details about memoisation.
+#' @export
+mem_read_subset_covid <- function(cache_memory = FALSE,
+                                  cache_dir = file.path(getwd(), ".rcache")) {
+        if (!requireNamespace("memoise")) {
+                message("Please install the 'memoise' package to use ",
+                        "memoisation")
+                return()
+        }
+
+        if (cache_memory) {
+                memoise::memoise(read_subset_covid)
+        } else {
+        memoise::memoise(read_subset_covid,
+                cache = memoise::cache_filesystem(cache_dir))
+        }
 }

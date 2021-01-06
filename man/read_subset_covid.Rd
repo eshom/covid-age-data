@@ -2,6 +2,7 @@
 % Please edit documentation in R/read_subset_covid.R
 \name{read_subset_covid}
 \alias{read_subset_covid}
+\alias{mem_read_subset_covid}
 \title{Read a subset of a COVerAGE-DB dataset}
 \usage{
 read_subset_covid(
@@ -12,6 +13,11 @@ read_subset_covid(
   Region,
   Sex,
   Date
+)
+
+mem_read_subset_covid(
+  cache_memory = FALSE,
+  cache_dir = file.path(getwd(), ".rcache")
 )
 }
 \arguments{
@@ -32,11 +38,18 @@ the following: "inputDB", "Output_5", "Output_10", "qualityMetrics".}
 
 \item{Date}{Either a character or Date vector of dates to include. If a
 character vector, then the date must be in "yyyy-mm-dd" format.}
+
+\item{cache_memory}{Should the subsets be cached in memory?}
+
+\item{cache_dir}{If 'cache_memory' is FALSE, then this is the path to cache
+subsets in.}
 }
 \value{
 By default a data frame with the subsetted dataset.
 Can be set to return either a data table or
 a tibble. The return type is controlled by the 'return' parameter.
+
+\code{\link[=mem_read_subset_covid]{mem_read_subset_covid()}} returns a memoised copy of \code{\link[=read_subset_covid]{read_subset_covid()}}
 }
 \description{
 Reads a subset of a locally saved COVerAGE-DB dataset.
@@ -51,6 +64,16 @@ it is advantageous to operate out-of-memory to be able to work with very
 large datasets, or to generally conserve memory the \emph{R} process uses.
 Specifically, this is useful for reading the 'inputDB' dataset,
 which currently holds millions of rows.
+
+\code{\link[=mem_read_subset_covid]{mem_read_subset_covid()}} is useful for caching subsetted datasets,
+to save time executing repeated calls.
+Note: if the original dataset updates,
+you need to remember to clear the cache to get
+updated results. You can do that by using \code{\link[memoise:forget]{memoise::forget()}} or by
+deleting the cache directory.
+}
+\seealso{
+\code{\link[memoise:memoise]{memoise::memoise()}} for details about memoisation.
 }
 \author{
 Erez Shomron

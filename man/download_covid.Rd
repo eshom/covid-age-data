@@ -35,9 +35,11 @@ download_covid_version(
 the following: "inputDB", "Output_5", "Output_10", "qualityMetrics".}
 
 \item{dest}{Character. If 'temp' is set to FALSE, specifies the directory
-the dataset should be downloaded to. By default, the current working directory.}
+the dataset should be downloaded to. By default,
+the current working directory.}
 
-\item{temp}{Logical. Should the dataset be downloaded to a temporary directory?}
+\item{temp}{Logical. Should the dataset be downloaded
+to a temporary directory?}
 
 \item{download_only}{Logical. Should the dataset be downloaded without
 reading it}
@@ -70,7 +72,8 @@ files and subdirectories are downloaded. Alternatively, a positive number
 will determine the number of levels to recurse.}
 
 \item{verbose}{Passed to \code{\link[osfr:osf_download]{osfr::osf_download()}} Logical, indicating whether
-to print informative messages about interactions with the OSF API (default FALSE).}
+to print informative messages about interactions with the OSF API
+(default FALSE).}
 
 \item{...}{Additional named arguments passed to \code{\link[data.table:fread]{data.table::fread()}}}
 
@@ -89,11 +92,13 @@ If 'download_only' is set to TRUE, the function will
 invisibly return NULL after downloading the dataset.
 }
 \description{
-Downloads one of the COVerAGE-DB datasets hosted on \href{https://osf.io/mpwjq/}{OSF}.
+Downloads one of the COVerAGE-DB
+datasets hosted on \href{https://osf.io/mpwjq/}{OSF}.
 It reads the downloaded data and converts it into a data frame.
 }
 \details{
-These functions use the OSF API to download the publicly available COVerAGE-DB
+These functions use the OSF API to download the
+publicly available COVerAGE-DB
 datasets. It then returns the downloaded dataset as a data frame, data table,
 or tibble. \code{\link[=download_covid]{download_covid()}} Uses the \pkg{{osfr}} package as a backend.
 \code{\link[=download_covid_version]{download_covid_version()}} uses \code{\link[utils:download.file]{utils::download.file()}} to download the
@@ -121,7 +126,8 @@ df <- download_covid_version("InputDB", version = 1)
 }
 \seealso{
 \code{\link[osfr:osf_retrieve]{osfr::osf_retrieve()}} for the OSF entity retrieval function;
-\code{\link[osfr:osf_download]{osfr::osf_download()}} for the downloading function; \code{\link[data.table:fread]{data.table::fread()}} for
+\code{\link[osfr:osf_download]{osfr::osf_download()}} for the downloading function;
+\code{\link[data.table:fread]{data.table::fread()}} for
 the reading function.
 }
 \author{
