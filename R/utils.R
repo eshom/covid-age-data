@@ -36,5 +36,12 @@ get_rinfo <- function(data = c("inputDB", "Output_5", "Output_10",
                                                 "numeric",  "numeric"),
                                               1))
 
-        return (rinfo)
+        return(rinfo)
+}
+
+coltypes_to_tidy <- function(rinfo) {
+        tmp <- substr(rinfo[[2]], 1, 1)
+        tmp <- sub("n", "d", tmp, fixed = TRUE) ## n for numeric; d for double
+        rinfo[[2]] <- paste(tmp, collapse = "")
+        rinfo
 }

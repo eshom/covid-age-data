@@ -1,21 +1,13 @@
-#' Reads a subset of a locally saved COVerAGE-DB dataset.
-#' Data manipulation is handled almost completely out-of-memory,
-#' at the cost of speed.
+#' Lazily reads a subset of a locally saved COVerAGE-DB dataset.
+#' Data manipulation is handled lazily.
 #'
-#' The function uses \pkg{ff} as backend for manipulating the dataset
-#' out-of-memory. Read and write operations on a drive are slower compared
-#' to running these operations on random-access memory (RAM). Nevertheless,
-#' it is advantageous to operate out-of-memory to be able to work with very
-#' large datasets, or to generally conserve memory the *R* process uses.
+#' The function uses \pkg{vroom} as backend for reading the dataset
+#' lazily. The result of this is a memory efficient processing of the data.
+#' This approach tends to be slower than reading the whole dataset in memory.
+#' Nevertheless, the cost in speed is advantageous to be able to work with
+#' very large datasets, or to generally conserve memory the *R* process uses.
 #' Specifically, this is useful for reading the 'inputDB' dataset,
 #' which currently holds millions of rows.
-#'
-#' [mem_read_subset_covid()] is useful for caching subsetted datasets,
-#' to save time executing repeated calls.
-#' Note: if the original dataset updates,
-#' you need to remember to clear the cache to get
-#' updated results. You can do that by using [memoise::forget()] or by
-#' deleting the cache directory.
 #' @title Read a subset of a COVerAGE-DB dataset
 #' @param zippath Character. The local zip archive of the downloaded dataset.
 #' @param data The name of the dataset that is to be read. Can be one of the
@@ -27,15 +19,12 @@
 #' @param Sex Character vector of sexes to select. Usually either 'b' for both.
 #' 'f' for females, and 'm' for males.
 #' @param Date Either a character or Date vector of dates to include. If a
-#' character vector, then the date must be in "yyyy-mm-dd" format.
+#' character vector.
 #' @return By default a data frame with the subsetted dataset.
 #' Can be set to return either a data table or
 #' a tibble. The return type is controlled by the 'return' parameter.
 #'
-#' [mem_read_subset_covid()] returns a memoised copy of [read_subset_covid()]
 #' @author Erez Shomron
-#'
-#' @importFrom ff .rambytes vmode
 #' @export
 read_subset_covid <- function(zippath,
                               data = c("inputDB", "Output_5", "Output_10",
@@ -44,103 +33,52 @@ read_subset_covid <- function(zippath,
                                          "tibble"),
                               Country, Region, Sex, Date) {
         stopifnot(is.character(data), is.character(zippath),
-                  length(zippath) == 1)
-        rinfo <- get_rinfo(data[1])
-        stopifnot(!is.null(rinfo))
+                length(zippath) == 1)
+        rinfo <- coltypes_to_tidy(get_rinfo(data[1]))
 
-        miss_args    <- c(Country = missing(Country),
-                          Region  = missing(Region),
-                          Sex     = missing(Sex),
-                          Date    = missing(Date))
-        # If there isn't any subset arguments, then stop here.
-        # Otherwise the returned dataset may take up too much memory,
-        # and the point of this function is too subset to reduce memory usage.
-        if (all(miss_args)) {
-                stop("No subsetting arguments were passed. ",
-                     "Out of memory subsetting is not required.")
-        }
-
-        # 'ffdf' objects support factors, but not character vectors.
-        # We will read characters as factors, and after subsetting,
-        # we will convert back factor columns to character columns.
-        rinfo[[2]] <- ifelse(rinfo[[2]] == "character", "factor", rinfo[[2]])
-
-        archivefile <- file.path("Data", paste0(data[1], ".csv"))
-        zcon <- unz(zippath, archivefile)
-        df   <- ff::read.csv.ffdf(file = zcon, colClasses = rinfo[[2]],
-                                  skip = rinfo[[3]])
+        df <- vroom::vroom(zippath, ",", col_types = rinfo[[2]],
+                           skip = rinfo[[3]])
 
         date_is_date <- inherits(df$Date, "Date")
 
-        if (!miss_args["Country"]) {
-                c  <- Country
-                df <- ffbase::subset.ffdf(df, Country %in% c)
+        if (!missing(Country)) {
+                df <- df[df$Country %in% Country, ]
         }
-        if (!miss_args["Region"] && !nrow(df) == 0) {
-                r  <- Region
-                df <- ffbase::subset.ffdf(df, Region %in% r)
+        if (!missing(Region)) {
+                df <- Region[df$Region %in% Region, ]
         }
-        if (!miss_args["Sex"] && !nrow(df) == 0) {
-                s  <- Sex
-                df <- ffbase::subset.ffdf(df, Sex %in% s)
+        if (!missing(Sex)) {
+                df <- df[df$Sex %in% Sex, ]
         }
-        if (!miss_args["Date"] && !nrow(df) == 0) {
+        if (!missing(Date)) {
                 if (!inherits(Date, "Date")) {
-                        # default expected format: yyyy-mm-dd
-                        Date <- as.Date(Date)
+                        Date <- as.Date(Date,
+                                        tryFormats = c("%Y-%m-%d", "%Y/%m/%d",
+                                                       "%d.%m.%Y", "%d/%m/%Y",
+                                                       "%m.%d.%Y", "%m/%d/%Y"))
                 }
                 if (!date_is_date) {
-                        df <- ffbase::transform.ffdf(
-                                              df,
-                                              Date = as.Date(Date, "%d.%m.%Y"))
+                        df$Date <- as.Date(df$Date, "%d.%m.%Y")
                 }
                 d  <- min(Date)
-                df <- ffbase::subset.ffdf(df, Date >= d)
+                df <- df[df$Date >= d, ]
         }
-        # No reason to continue if we have 0 rows
-        if (nrow(df) == 0) return(as.data.frame(df))
-
-        out <- as.data.frame(df)
-
-        # Convert factor columns back to character columns
-        out <- collapse::ftransformv(out, is.factor, as.character)
 
         # if df$Date wasn't a Date object, and it was transformed,
         # then convert back.
-        if (!miss_args["Date"] && !date_is_date) {
-                out <- collapse::ftransform(
-                                         out,
-                                         Date = format(Date, "%d.%m.%Y"))
+        if (!missing(Date) && !date_is_date) {
+                df$Date <- format(df$Date, "%d.%m.%Y")
         }
 
+        ## Coercing the data using collapse might return an object
+        ## That is completely in memory. This is intentional. After subsetting
+        ## the memory usage should be considerably less expensive.
         return <- return[1]
         switch(return,
-               data.frame = return(out),
-               data.table = return(collapse::qDT(out)),
-               tibble     = return(collapse::qTBL(out)))
+                data.frame = return(collapse::qDF(df)),
+                data.table = return(collapse::qDT(df)),
+                tibble = return(collapse::qTBL(df)))
 
         warning("Invalid return type specified, returning data.frame")
-        return(out)
-}
-
-#' @rdname read_subset_covid
-#' @param cache_memory Should the subsets be cached in memory?
-#' @param cache_dir If 'cache_memory' is FALSE, then this is the path to cache
-#' subsets in.
-#' @seealso [memoise::memoise()] for details about memoisation.
-#' @export
-mem_read_subset_covid <- function(cache_memory = FALSE,
-                                  cache_dir = file.path(getwd(), ".rcache")) {
-        if (!requireNamespace("memoise")) {
-                message("Please install the 'memoise' package to use ",
-                        "memoisation")
-                return()
-        }
-
-        if (cache_memory) {
-                memoise::memoise(read_subset_covid)
-        } else {
-        memoise::memoise(read_subset_covid,
-                cache = memoise::cache_filesystem(cache_dir))
-        }
+        return(collapse::qDF(df))
 }

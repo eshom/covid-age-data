@@ -18,7 +18,7 @@ Expecting a COVerAGE-DB dataset.}
 'f' for females, and 'm' for males.}
 
 \item{Date}{Either a character or Date vector of dates to include. If a
-character vector, then the date must be in "yyyy-mm-dd" format.}
+character vector.}
 }
 \value{
 The subsetted data frame like object.
