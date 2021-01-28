@@ -45,7 +45,7 @@ read_subset_covid <- function(zippath,
                 df <- df[df$Country %in% Country, ]
         }
         if (!missing(Region)) {
-                df <- Region[df$Region %in% Region, ]
+                df <- df[df$Region %in% Region, ]
         }
         if (!missing(Sex)) {
                 df <- df[df$Sex %in% Sex, ]
