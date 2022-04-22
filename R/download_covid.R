@@ -95,7 +95,7 @@ download_covid <- function(data = c("inputDB", "Output_5", "Output_10",
                 path <- dest
         }
 
-        osf <- osfr::osf_retrieve_file(rinfo[[1]])
+        osf <- osfr::osf_retrieve_file(rinfo[["id"]])
         osfr::osf_download(osf, path, progress = progress,
                            conflicts = conflicts, recurse = recurse,
                            verbose = verbose)
